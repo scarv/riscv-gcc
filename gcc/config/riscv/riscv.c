@@ -263,6 +263,9 @@ struct riscv_cpu_info {
   /* This CPU's canonical name.  */
   const char *name;
 
+  /* Which automaton to use for tuning.  */
+  enum riscv_microarchitecture_type microarchitecture;
+
   /* Tuning parameters for this CPU.  */
   const struct riscv_tune_info *tune_info;
 };
@@ -274,6 +277,9 @@ bool riscv_slow_unaligned_access;
 
 /* Which tuning parameters to use.  */
 static const struct riscv_tune_info *tune_info;
+
+/* Which automaton to use for tuning.  */
+enum riscv_microarchitecture_type riscv_microarchitecture;
 
 /* Index R is the smallest register class that contains register R.  */
 const enum reg_class riscv_regno_to_class[FIRST_PSEUDO_REGISTER] = {
@@ -309,6 +315,19 @@ static const struct riscv_tune_info rocket_tune_info = {
   true,						/* slow_unaligned_access */
 };
 
+/* Costs to use when optimizing for bullet.  */
+static const struct riscv_tune_info bullet_tune_info = {
+  {COSTS_N_INSNS (4), COSTS_N_INSNS (5)},	/* fp_add */
+  {COSTS_N_INSNS (4), COSTS_N_INSNS (5)},	/* fp_mul */
+  {COSTS_N_INSNS (20), COSTS_N_INSNS (20)},	/* fp_div */
+  {COSTS_N_INSNS (4), COSTS_N_INSNS (4)},	/* int_mul */
+  {COSTS_N_INSNS (6), COSTS_N_INSNS (6)},	/* int_div */
+  2,						/* issue_rate */
+  3,						/* branch_cost */
+  3,						/* memory_cost */
+  true,						/* slow_unaligned_access */
+};
+
 /* Costs to use when optimizing for size.  */
 static const struct riscv_tune_info optimize_size_tune_info = {
   {COSTS_N_INSNS (1), COSTS_N_INSNS (1)},	/* fp_add */
@@ -324,8 +343,9 @@ static const struct riscv_tune_info optimize_size_tune_info = {
 
 /* A table describing all the processors GCC knows about.  */
 static const struct riscv_cpu_info riscv_cpu_info_table[] = {
-  { "rocket", &rocket_tune_info },
-  { "size", &optimize_size_tune_info },
+  { "bullet", bullet, &bullet_tune_info },
+  { "rocket", generic, &rocket_tune_info },
+  { "size", generic, &optimize_size_tune_info },
 };
 
 /* Return the riscv_cpu_info entry for the given name string.  */
@@ -3957,6 +3977,7 @@ riscv_option_override (void)
   /* Handle -mtune.  */
   cpu = riscv_parse_cpu (riscv_tune_string ? riscv_tune_string :
 			 RISCV_TUNE_STRING_DEFAULT);
+  riscv_microarchitecture = cpu->microarchitecture;
   tune_info = optimize_size ? &optimize_size_tune_info : cpu->tune_info;
 
   /* Use -mtune's setting for slow_unaligned_access, even when optimizing

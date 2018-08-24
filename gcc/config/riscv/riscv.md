@@ -146,7 +146,7 @@
 (define_attr "type"
   "unknown,branch,jump,call,load,fpload,store,fpstore,
    mtc,mfc,const,arith,logical,shift,slt,imul,idiv,move,fmove,fadd,fmul,
-   fmadd,fdiv,fcmp,fcvt,fsqrt,multi,nop,ghost"
+   fmadd,fdiv,fcmp,fcvt,fsqrt,multi,auipc,nop,ghost"
   (cond [(eq_attr "got" "load") (const_string "load")
 
 	 ;; If a doubleword move uses these expensive instructions,
@@ -224,6 +224,12 @@
 
 ;; Is copying of this instruction disallowed?
 (define_attr "cannot_copy" "no,yes" (const_string "no"))
+
+;; Microarchitectures we know how to tune for.
+;; Keep this in sync with enum riscv_microarchitecture.
+(define_attr "tune"
+  "bullet,generic"
+  (const (symbol_ref "((enum attr_tune) riscv_microarchitecture)")))
 
 ;; Describe a user's asm statement.
 (define_asm_attributes
@@ -1192,7 +1198,7 @@
 	    UNSPEC_AUIPC))]
   ""
   ".LA%2: auipc\t%0,%h1"
-  [(set_attr "type" "arith")
+  [(set_attr "type" "auipc")
    (set_attr "cannot_copy" "yes")])
 
 ;; Instructions for adding the low 12 bits of an address to a register.
@@ -2108,3 +2114,4 @@
 (include "peephole.md")
 (include "pic.md")
 (include "generic.md")
+(include "bullet.md")
