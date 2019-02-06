@@ -1538,29 +1538,16 @@
 
 ;; Conditional branches
 
-(define_insn "*branch_order<mode>"
+(define_insn "*branch<mode>"
   [(set (pc)
 	(if_then_else
 	 (match_operator 1 "order_operator"
 			 [(match_operand:X 2 "register_operand" "r")
-			  (match_operand:X 3 "register_operand" "r")])
+			  (match_operand:X 3 "reg_or_0_operand" "rJ")])
 	 (label_ref (match_operand 0 "" ""))
 	 (pc)))]
   ""
-  "b%C1\t%2,%3,%0"
-  [(set_attr "type" "branch")
-   (set_attr "mode" "none")])
-
-(define_insn "*branch_zero<mode>"
-  [(set (pc)
-	(if_then_else
-	 (match_operator 1 "signed_order_operator"
-			 [(match_operand:X 2 "register_operand" "r")
-			  (const_int 0)])
-	 (label_ref (match_operand 0 "" ""))
-	 (pc)))]
-  ""
-  "b%C1z\t%2,%0"
+  "b%C1%y3\t%2,%w3%0"
   [(set_attr "type" "branch")
    (set_attr "mode" "none")])
 

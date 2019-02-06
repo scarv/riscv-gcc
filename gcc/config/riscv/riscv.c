@@ -2962,6 +2962,8 @@ riscv_memmodel_needs_release_fence (enum memmodel model)
    'C'	Print the integer branch condition for comparison OP.
    'A'	Print the atomic operation suffix for memory model OP.
    'F'	Print a FENCE if the memory model requires a release.
+   'w'	Print nothing if OP is zero, otherwise print OP followed by a comma.
+   'y'	Print 'z' if OP is zero, otherwise print nothing.
    'z'	Print x0 if OP is zero, otherwise print OP normally.
    'i'	Print i if the operand is not a register.  */
 
@@ -3007,9 +3009,13 @@ riscv_print_operand (FILE *file, rtx op, int letter)
       switch (code)
 	{
 	case REG:
-	  if (letter && letter != 'z')
+	  if (letter && letter == 'y')
+	    break;
+	  else if (letter && letter != 'w' && letter != 'z')
 	    output_operand_lossage ("invalid use of '%%%c'", letter);
 	  fprintf (file, "%s", reg_names[REGNO (op)]);
+	  if (letter == 'w')
+	    fputs(",", file);
 	  break;
 
 	case MEM:
@@ -3020,9 +3026,13 @@ riscv_print_operand (FILE *file, rtx op, int letter)
 	  break;
 
 	default:
-	  if (letter == 'z' && op == CONST0_RTX (GET_MODE (op)))
+	  if (letter == 'w')
+	    break;
+	  else if (letter == 'y' && op == CONST0_RTX (GET_MODE (op)))
+	    fputs ("z", file);
+	  else if (letter == 'z' && op == CONST0_RTX (GET_MODE (op)))
 	    fputs (reg_names[GP_REG_FIRST], file);
-	  else if (letter && letter != 'z')
+	  else if (letter && letter != 'y' && letter != 'z')
 	    output_operand_lossage ("invalid use of '%%%c'", letter);
 	  else
 	    output_addr_const (file, riscv_strip_unspec_address (op));
