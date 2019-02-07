@@ -36,6 +36,11 @@
        (eq_attr "type" "branch"))
   "bullet_B")
 
+(define_insn_reservation "bullet_sfb_alu" 2
+  (and (eq_attr "tune" "bullet")
+       (eq_attr "type" "sfb_alu"))
+  "bullet_A+bullet_B")
+
 (define_insn_reservation "bullet_jump" 1
   (and (eq_attr "tune" "bullet")
        (eq_attr "type" "jump,call"))
@@ -93,10 +98,13 @@
        (eq_attr "type" "mfc"))
   "bullet_A")
 
-(define_bypass 1 "bullet_load,bullet_alu,bullet_mul,bullet_f2i"
+(define_bypass 1 "bullet_load,bullet_alu,bullet_mul,bullet_f2i,bullet_sfb_alu"
   "bullet_alu,bullet_branch")
 
-(define_bypass 1 "bullet_load,bullet_alu,bullet_mul,bullet_f2i"
+(define_bypass 1 "bullet_alu,bullet_sfb_alu"
+  "bullet_sfb_alu")
+
+(define_bypass 1 "bullet_load,bullet_alu,bullet_mul,bullet_f2i,bullet_sfb_alu"
   "bullet_store" "store_data_bypass_p")
 
 (define_bypass 2 "bullet_i2f"

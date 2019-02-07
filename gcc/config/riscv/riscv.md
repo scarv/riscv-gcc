@@ -146,7 +146,7 @@
 (define_attr "type"
   "unknown,branch,jump,call,load,fpload,store,fpstore,
    mtc,mfc,const,arith,logical,shift,slt,imul,idiv,move,fmove,fadd,fmul,
-   fmadd,fdiv,fcmp,fcvt,fsqrt,multi,auipc,nop,ghost"
+   fmadd,fdiv,fcmp,fcvt,fsqrt,multi,auipc,sfb_alu,nop,ghost"
   (cond [(eq_attr "got" "load") (const_string "load")
 
 	 ;; If a doubleword move uses these expensive instructions,
@@ -1579,6 +1579,7 @@
    b%C5%y2 %1, %w2 1f; mv %0, %z4; 1: # movcc
    b%C5%y2 %1, %w2 1f; li %0, %4; 1: # movcc"
   [(set_attr "length" "8")
+   (set_attr "type" "sfb_alu")
    (set_attr "mode" "<GPR:MODE>")])
 
 ;; Used to implement built-in functions.
