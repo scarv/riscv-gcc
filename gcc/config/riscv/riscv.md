@@ -1551,6 +1551,36 @@
   [(set_attr "type" "branch")
    (set_attr "mode" "none")])
 
+;; Patterns for implementations that optimize short forward branches
+
+(define_expand "mov<mode>cc"
+  [(set (match_operand:GPR 0 "register_operand")
+	(if_then_else:GPR (match_operand 1 "comparison_operator")
+			  (match_operand:GPR 2 "register_operand")
+			  (match_operand:GPR 3 "arith_operand")))]
+  "TARGET_SFB_ALU"
+{
+  rtx cmp = operands[1];
+  riscv_expand_conditional_move (operands[0], operands[2], operands[3],
+				 GET_CODE (cmp), XEXP (cmp, 0), XEXP (cmp, 1));
+  DONE;
+})
+
+(define_insn "*mov<GPR:mode><X:mode>cc"
+  [(set (match_operand:GPR 0 "register_operand" "=r,r")
+	(if_then_else:GPR
+	 (match_operator 5 "order_operator"
+		[(match_operand:X 1 "register_operand" "r,r")
+		 (match_operand:X 2 "reg_or_0_operand" "rJ,rJ")])
+	 (match_operand:GPR 3 "register_operand" "0,0")
+	 (match_operand:GPR 4 "arith_operand" "rJ,I")))]
+  "TARGET_SFB_ALU"
+  "@
+   b%C5%y2 %1, %w2 1f; mv %0, %z4; 1: # movcc
+   b%C5%y2 %1, %w2 1f; li %0, %4; 1: # movcc"
+  [(set_attr "length" "8")
+   (set_attr "mode" "<GPR:MODE>")])
+
 ;; Used to implement built-in functions.
 (define_expand "condjump"
   [(set (pc)
