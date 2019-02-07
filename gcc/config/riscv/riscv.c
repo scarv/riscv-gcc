@@ -323,7 +323,7 @@ static const struct riscv_tune_info bullet_tune_info = {
   {COSTS_N_INSNS (4), COSTS_N_INSNS (4)},	/* int_mul */
   {COSTS_N_INSNS (6), COSTS_N_INSNS (6)},	/* int_div */
   2,						/* issue_rate */
-  3,						/* branch_cost */
+  4,						/* branch_cost */
   3,						/* memory_cost */
   true,						/* slow_unaligned_access */
 };
