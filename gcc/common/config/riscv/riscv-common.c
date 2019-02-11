@@ -81,6 +81,12 @@ riscv_parse_arch_string (const char *isa, int *flags, location_t loc)
 	      p++;
 	    }
 	}
+    if(*p == 'x')
+    {
+      *flags |= MASK_XCRYPTO;
+      p++;
+    }
+
     }
   else if (*p == 'e')
     {
